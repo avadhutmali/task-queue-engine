@@ -17,4 +17,7 @@ public class Task {
     private String description;
     private String status;
     private LocalDateTime createdAt;
+    private String queueName;
+    private String payload;
+
 }

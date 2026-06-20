@@ -21,9 +21,12 @@ public class TaskService {
     }
     public Task setTask(TaskRequest taskRequest){
         Task task = Task.builder()
-            .description(taskRequest.getDescription())
-            .status("PENDING")
-            .build();
+                .payload(taskRequest.getPayload())
+                .queueName(taskRequest.getQueueName())
+                .description(taskRequest.getDescription())
+                .status("PENDING")
+                .build();
+
         return taskRepository.save(task);
     }
 

@@ -1,7 +1,6 @@
 package com.avadhut.dtq.repository;
 
 import com.avadhut.dtq.models.Task;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -21,10 +20,12 @@ public class TaskRepository  {
 
     RowMapper<Task> mapper = (rs, rowNum)->{
         Task task = Task.builder()
-            .id(UUID.fromString(rs.getString("id")))
-            .description(rs.getString("description"))
-            .createdAt(rs.getTimestamp("createdAt").toLocalDateTime())
-            .status(rs.getString("status"))
+                .id(UUID.fromString(rs.getString("id")))
+                .description(rs.getString("description"))
+                .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                .status(rs.getString("status"))
+                .queueName(rs.getString("queue_name"))
+                .payload(rs.getString("payload"))
             .build();
 
         return task;
@@ -33,16 +34,15 @@ public class TaskRepository  {
     public Task save(Task task){
         UUID id = UUID.randomUUID();
         String sql = """
-                INSERT INTO tasks (id, description,status)
-                VALUES(?,?,?,?)
+                INSERT INTO tasks (id, description,status,queue_name,payload)
+                VALUES(?,?,?,?,?::jsonb)
                 RETURNING created_at
                 """;
-        jdbcTemplate.update(sql, id,task.getDescription(),task.getStatus(), task.getCreatedAt());
 
         LocalDateTime create_at = jdbcTemplate.queryForObject(
             sql,
             (rs,roNum)-> rs.getTimestamp("created_at").toLocalDateTime(),
-            id, task.getDescription(),task.getStatus()
+            id, task.getDescription(),task.getStatus(),task.getQueueName(),task.getPayload()
         );
 
         task.setId(id);
